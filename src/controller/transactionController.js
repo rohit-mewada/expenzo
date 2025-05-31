@@ -1,41 +1,6 @@
-import express from "express";
-import dotenv from "dotenv";
-import { sql } from "./config/db.js";
+import { sql } from "../config/db.js"
 
-dotenv.config();
-
-const app = express();
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-
-// Middleware to log the request
-app.use((req, res, next) => {
-    console.log(`Hey we hit a req, the url is ${req.url} and the method is ${req.method}`);
-    next();
-});
-
-const PORT = process.env.PORT || 3000;
-
-async function initDB() {
-    try {
-        await sql`create table if not exists transactions (
-            id serial primary key,
-            user_id varchar(255) not null,
-            title varchar(255) not null,
-            amount decimal(10, 2) not null,
-            category varchar(255) not null,
-            created_at timestamp default current_date
-        )`;
-
-        console.log("Database initialized successfully");
-    } catch (error) {
-        console.error("Error initializing database:", error);
-        process.exit(1);
-    }
-}
-
-app.get("/api/transactions", async (req, res) => {
+export async function getTransactions(req, res) {
     try {
         const transactions = await sql`select * from transactions`;
         res.status(200).json(transactions);
@@ -46,9 +11,9 @@ app.get("/api/transactions", async (req, res) => {
         console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Failed to fetch transactions" });
     }
-});
+}
 
-app.get("/api/transactions/:userId", async (req, res) => {
+export async function getTransactionByUserId(req, res) {
     try {
         const { userId } = req.params;
         const transactions = await sql`select * from transactions where user_id = ${userId}`;
@@ -65,9 +30,9 @@ app.get("/api/transactions/:userId", async (req, res) => {
         console.error("Error fetching transactions:", error);
         res.status(500).json({ error: "Failed to fetch transactions" });
     }
-});
+}
 
-app.post("/api/transactions", async (req, res) => {
+export async function addTransaction(req, res) {
     try {
         const { user_id, title, amount, category } = req.body;
 
@@ -84,9 +49,9 @@ app.post("/api/transactions", async (req, res) => {
         console.error("Error creating transaction:", error);
         res.status(500).json({ error: "Failed to create transaction" });
     }
-});
+}
 
-app.put("/api/transactions/:id", async (req, res) => {
+export async function updateTransaction(req, res) {
     try {
         const { id } = req.params;
         if(isNaN(parseInt(id))) {
@@ -114,9 +79,9 @@ app.put("/api/transactions/:id", async (req, res) => {
         console.error("Error updating transaction:", error);
         res.status(500).json({ error: "Failed to update transaction" });
     }
-});
+}
 
-app.delete("/api/transactions/:id", async (req, res) => {
+export async function deleteTransaction(req, res) {
     try {
         const { id } = req.params;
 
@@ -137,9 +102,9 @@ app.delete("/api/transactions/:id", async (req, res) => {
         console.error("Error deleting transaction:", error);
         res.status(500).json({ error: "Failed to delete transaction" });
     }
-});
+}
 
-app.get("/api/transactions/summary/:userId", async (req, res) => {
+export async function getSummary(req, res) {
     try {
         const { userId } = req.params;
 
@@ -157,16 +122,4 @@ app.get("/api/transactions/summary/:userId", async (req, res) => {
         console.error("Error getting summary:", error);
         res.status(500).json({ error: "Failed to get summary" });
     }
-});
-
-
-// Initialize database before starting the server
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}).catch(error => {
-  console.error("Failed to initialize database:", error);
-  process.exit(1);
-});
-
+}
