@@ -113,7 +113,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   statDivider: {
-    borderRightWidth: 1,
+    borderLeftWidth: 1,
     borderColor: COLORS.border,
   },
   balanceStatLabel: {

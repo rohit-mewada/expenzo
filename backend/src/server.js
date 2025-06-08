@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 
-//rate limiter
+// Apply rate limiter middleware
 app.use(ratelimiter);
 
 // Middleware to parse JSON bodies
@@ -16,21 +16,24 @@ app.use(express.json());
 
 // Middleware to log the request
 app.use((req, res, next) => {
-    console.log(`Hey we hit a req, the url is ${req.url} and the method is ${req.method}`);
-    next();
+  console.log(`Request: ${req.method} ${req.url}`);
+  next();
 });
 
 const PORT = process.env.PORT || 3000;
 
-app.use("/api/transactions", transactionsRoute)
+// Mount transactions API route
+app.use("/api/transactions", transactionsRoute);
 
 // Initialize database before starting the server
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+initDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error("Failed to initialize database:", error);
+    process.exit(1);
   });
-}).catch(error => {
-  console.error("Failed to initialize database:", error);
-  process.exit(1);
-});
 

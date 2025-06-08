@@ -8,69 +8,70 @@ import { Ionicons } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
+/**
+ * SignUpScreen allows users to register and verify their email.
+ * Handles error display and navigation to sign-in.
+ */
 export default function SignUpScreen() {
-  const { isLoaded, signUp, setActive } = useSignUp()
-  const router = useRouter()
+  const { isLoaded, signUp, setActive } = useSignUp();
+  const router = useRouter();
 
-  const [emailAddress, setEmailAddress] = useState('')
-  const [password, setPassword] = useState('')
-  const [pendingVerification, setPendingVerification] = useState(false)
-  const [code, setCode] = useState('')
-  const [error, setError] = useState('')
+  const [emailAddress, setEmailAddress] = useState('');
+  const [password, setPassword] = useState('');
+  const [pendingVerification, setPendingVerification] = useState(false);
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
 
-  // Handle submission of sign-up form
+  /**
+   * Handles sign-up form submission.
+   */
   const onSignUpPress = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
 
-    // Start sign-up process using email and password provided
     try {
       await signUp.create({
         emailAddress,
         password,
-      })
+      });
 
-      // Send user an email with verification code
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
-      setPendingVerification(true)
+      // Send verification code to email
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setPendingVerification(true);
     } catch (err) {
-      if(err.errors?.[0]?.code === "from_identifier_exists") {
+      if (err.errors?.[0]?.code === "from_identifier_exists") {
         setError("This email is already in use. Please try another.");
       } else {
-        setError("An error occured. Please try again.");
+        setError("An error occurred. Please try again.");
       }
     }
-  }
+  };
 
-  // Handle submission of verification form
+  /**
+   * Handles verification code submission.
+   */
   const onVerifyPress = async () => {
-    if (!isLoaded) return
+    if (!isLoaded) return;
 
     try {
-      // Use the code the user provided to attempt verification
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code,
-      })
+      });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
       if (signUpAttempt.status === 'complete') {
-        await setActive({ session: signUpAttempt.createdSessionId })
-        router.replace('/')
+        await setActive({ session: signUpAttempt.createdSessionId });
+        router.replace('/');
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
-        console.error(JSON.stringify(signUpAttempt, null, 2))
+        // Handle further steps if needed
+        console.error(JSON.stringify(signUpAttempt, null, 2));
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
-      console.error(JSON.stringify(err, null, 2))
+      // Clerk error handling
+      setError("Verification failed. Please check your code and try again.");
+      console.error(JSON.stringify(err, null, 2));
     }
-  }
+  };
 
+  // Verification code input screen
   if (pendingVerification) {
     return (
       <View style={styles.verificationContainer}>
@@ -91,26 +92,30 @@ export default function SignUpScreen() {
           value={code}
           placeholder="Enter your verification code"
           placeholderTextColor="#9A8478"
-          onChangeText={(code) => setCode(code)}
+          onChangeText={setCode}
         />
         <TouchableOpacity onPress={onVerifyPress} style={styles.button}>
           <Text style={styles.buttonText}>Verify</Text>
         </TouchableOpacity>
       </View>
-    )
+    );
   }
 
+  // Main sign-up form
   return (
-    <KeyboardAwareScrollView style={{ flex: 1 }}
+    <KeyboardAwareScrollView
+      style={{ flex: 1 }}
       contentContainerStyle={{ flexGrow: 1 }}
       enableOnAndroid={true}
       enableAutomaticScroll={true}
       extraScrollHeight={100}
     >
       <View style={styles.container}>
+        {/* Illustration */}
         <Image source={require("../../assets/images/revenue-i2.png")} style={styles.illustration} />
         <Text style={styles.title}>Create Account</Text>
 
+        {/* Error message */}
         {error ? (
           <View style={styles.errorBox}>
             <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
@@ -121,36 +126,39 @@ export default function SignUpScreen() {
           </View>
         ) : null}
 
+        {/* Email input */}
         <TextInput
           style={[styles.input, error && styles.errorInput]}
           autoCapitalize="none"
           value={emailAddress}
           placeholderTextColor="#9A8478"
           placeholder="Enter email"
-          onChangeText={(email) => setEmailAddress(email)}
+          onChangeText={setEmailAddress}
         />
 
+        {/* Password input */}
         <TextInput
           style={[styles.input, error && styles.errorInput]}
           value={password}
           placeholderTextColor="#9A8478"
           placeholder="Enter password"
           secureTextEntry={true}
-          onChangeText={(password) => setPassword(password)}
+          onChangeText={setPassword}
         />
 
+        {/* Sign Up button */}
         <TouchableOpacity style={styles.button} onPress={onSignUpPress}>
           <Text style={styles.buttonText}>Sign Up</Text>
         </TouchableOpacity>
 
+        {/* Footer: link to sign in */}
         <View style={styles.footerContainer}>
           <Text style={styles.footerText}>Already have an account?</Text>
           <TouchableOpacity onPress={() => router.back()}>
             <Text style={styles.linkText}>Sign in</Text>
           </TouchableOpacity>
         </View>
-
       </View>
     </KeyboardAwareScrollView>
-  )
+  );
 }
