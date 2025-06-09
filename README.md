@@ -115,7 +115,7 @@ Let’s make Expenzo the best open-source finance tracker together.
 ## 🧙‍♂️ The Team
 
 - **You!** (and everyone who joins the adventure)
-- [Your Name Here]
+- Rohit Mewada
 
 ---
 
