@@ -112,7 +112,7 @@ export default function SignUpScreen() {
     >
       <View style={styles.container}>
         {/* Illustration */}
-        <Image source={require("../../assets/images/revenue-i2.png")} style={styles.illustration} />
+        <Image source={require("../../assets/images/signup.png")} style={styles.illustration} />
         <Text style={styles.title}>Create Account</Text>
 
         {/* Error message */}

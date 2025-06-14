@@ -61,7 +61,7 @@ export default function SignInScreen() {
     >
       <View style={styles.container}>
         {/* Illustration */}
-        <Image source={require("../../assets/images/revenue-i4.png")} style={styles.illustration} />
+        <Image source={require("../../assets/images/signin.png")} style={styles.illustration} />
 
         <Text style={styles.title}>Welcome Back</Text>
 
@@ -70,7 +70,7 @@ export default function SignInScreen() {
           <View style={styles.errorBox}>
             <Ionicons name="alert-circle" size={20} color={COLORS.expense} />
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity onPress={() => setError("")}>
+            <TouchableOpacity onPress={() => setError(error)}>
               <Ionicons name="close" size={20} color={COLORS.textLight} />
             </TouchableOpacity>
           </View>
