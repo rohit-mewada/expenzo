@@ -121,3 +121,62 @@ export async function getSummary(req, res) {
         res.status(500).json({ error: "Failed to get summary" });
     }
 }
+
+/** 
+ * Get transactions by user ID and date range.
+ */
+export async function getTransactionByUserIdInDateRange(req, res) {
+    try {
+        const { userId } = req.params;
+        const { filter, start, end } = req.query;
+
+        let startDate, endDate
+        const today = new Date();
+
+        switch (filter) {
+            case 'today':
+                startDate = new Date(today.setHours(0, 0, 0, 0));
+                endDate = new Date(today.setHours(23, 59, 59, 999));
+                break;
+            case 'last7':
+                startDate = new Date();
+                startDate.setDate(today.getDate() - 6);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            case 'last30':
+                startDate = new Date();
+                startDate.setDate(today.getDate() - 29);
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            case 'custom':
+                startDate = new Date(start);
+                endDate = new Date(end);
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid filter type' });
+        }
+
+        const transactions = await sql`
+            select * from transactions
+            where user_id = ${userId} and
+            created_at >= ${startDate} and
+            created_at <= ${endDate}
+        `;
+
+        if (transactions.length === 0) {
+            return res.status(404).json({ message: "No transactions found in the specified date range" });
+        }
+        // Ensure transactions are sorted by date in descending order
+        transactions.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        console.log("Transactions in date range fetched successfully");
+        return res.status(200).json(transactions);
+    } catch (error) {
+        console.error("Error fetching transactions in date range:", error);
+        res.status(500).json({ error: "Failed to fetch transactions in date range" });
+    }
+}

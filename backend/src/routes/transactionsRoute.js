@@ -4,6 +4,7 @@ import {
     deleteTransaction,
     getSummary,
     getTransactionByUserId,
+    getTransactionByUserIdInDateRange,
     getTransactions,
     updateTransaction
 } from "../controller/transactionController.js";
@@ -27,5 +28,8 @@ router.delete("/:id", deleteTransaction);
 
 // Get summary for a user
 router.get("/summary/:userId", getSummary);
+
+// Get transactions by user ID in date range
+router.get("/date/:userId", getTransactionByUserIdInDateRange);
 
 export default router;
